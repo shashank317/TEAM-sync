@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-white dark:bg-black text-black dark:text-white transition-colors">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project Members - TeamSync</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen px-6 py-8">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Project Members</h1>
+    <div class="flex gap-4 items-center">
+      <button onclick="toggleDarkMode()" class="border px-3 py-1 rounded dark:bg-gray-700">
+        🌓
+      </button>
+      <a href="/dashboard" class="text-blue-500 underline">← Back to Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Invite Link Section -->
+  <div class="mb-6">
+    <button onclick="generateInviteLink()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+      Generate Invite Link
+    </button>
+    <div id="inviteLink" class="mt-2 text-sm text-green-400"></div>
+  </div>
+
+  <!-- Add Member Form -->
+  <form onsubmit="addMember(event)" class="bg-white dark:bg-gray-800 p-4 rounded shadow mb-8">
+    <h2 class="text-lg font-semibold mb-2">Add Member</h2>
+    <div class="flex gap-4 items-center">
+      <input id="userIdInput" type="number" placeholder="User ID"
+        class="border dark:bg-gray-700 dark:border-gray-600 rounded px-3 py-2 text-black dark:text-white w-32" />
+      <select id="roleInput" class="border dark:bg-gray-700 dark:border-gray-600 rounded px-3 py-2 text-black dark:text-white">
+        <option value="editor">Editor</option>
+        <option value="viewer">Viewer</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+        Add
+      </button>
+    </div>
+  </form>
+
+  <!-- Member List -->
+  <div id="memberList" class="space-y-4"></div>
+
+  <script>
+    const token = localStorage.getItem('access_token');
+    const projectId = new URLSearchParams(window.location.search).get("project_id");
+
+    if (!token || !projectId) {
+      alert("Missing token or project_id");
+      window.location.href = "/login";
+    }
+
+    async function fetchMembers() {
+      const res = await fetch(`/projects/${projectId}/members`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const members = await res.json();
+      const container = document.getElementById("memberList");
+      container.innerHTML = "";
+
+      members.forEach(member => {
+        const memberDiv = document.createElement("div");
+        memberDiv.className = "bg-white dark:bg-gray-800 p-4 rounded shadow flex justify-between items-center";
+
+        memberDiv.innerHTML = `
+          <div>
+            <div class="font-bold">${member.name}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">${member.email}</div>
+            <div class="text-sm mt-1">Role: <span id="role-${member.user_id}">${member.role}</span></div>
+          </div>
+          <div class="flex gap-2">
+            <select onchange="updateMemberRole(${member.user_id}, this.value)"
+              class="border dark:bg-gray-700 dark:border-gray-600 px-2 py-1 rounded text-sm text-black dark:text-white">
+              <option value="editor" ${member.role === 'editor' ? 'selected' : ''}>Editor</option>
+              <option value="viewer" ${member.role === 'viewer' ? 'selected' : ''}>Viewer</option>
+              <option value="admin" ${member.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+            <button onclick="removeMember(${member.user_id})" class="text-red-500 hover:underline">Remove</button>
+          </div>
+        `;
+        container.appendChild(memberDiv);
+      });
+    }
+
+    async function addMember(e) {
+      e.preventDefault();
+      const userId = document.getElementById("userIdInput").value;
+      const role = document.getElementById("roleInput").value;
+
+      const res = await fetch(`/projects/${projectId}/members`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ user_id: parseInt(userId), role })
+      });
+
+      if (res.ok) {
+        document.getElementById("userIdInput").value = "";
+        fetchMembers();
+      } else {
+        const err = await res.json();
+        alert(err.detail || "Failed to add member");
+      }
+    }
+
+    async function removeMember(userId) {
+      if (!confirm("Remove this member?")) return;
+
+      const res = await fetch(`/projects/${projectId}/members/${userId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        fetchMembers();
+      } else {
+        const err = await res.json();
+        alert(err.detail || "Failed to remove member");
+      }
+    }
+
+    async function updateMemberRole(userId, newRole) {
+      const res = await fetch(`/projects/${projectId}/members/${userId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ role: newRole })
+      });
+
+      if (res.ok) {
+        document.getElementById(`role-${userId}`).textContent = newRole;
+      } else {
+        const err = await res.json();
+        alert(err.detail || "Failed to update role");
+      }
+    }
+
+    async function generateInviteLink() {
+      const res = await fetch(`/projects/${projectId}/members/invite-link`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+      if (data.invite_link) {
+        const inviteEl = document.getElementById("inviteLink");
+        inviteEl.innerHTML = `<a href="${data.invite_link}" target="_blank" class="underline text-green-300">${data.invite_link}</a>`;
+      } else {
+        alert("Failed to generate invite link.");
+      }
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle("dark");
+      const isDark = document.documentElement.classList.contains("dark");
+      localStorage.setItem("darkMode", isDark ? "true" : "false");
+    }
+
+    if (localStorage.getItem("darkMode") === "true") {
+      document.documentElement.classList.add("dark");
+    }
+
+    fetchMembers();
+  </script>
+</body>
+</html>
