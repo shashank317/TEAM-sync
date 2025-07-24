@@ -30,7 +30,7 @@ async def chat(payload: ChatRequest):
     }
 
     body = {
-        "model": "google/gemma-3n-e4b-it:free",
+        "model": "qwen/qwen3-235b-a22b:free",
         "messages": [
             {"role": "user", "content": payload.message}
         ]
