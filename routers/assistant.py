@@ -24,13 +24,14 @@ async def chat(payload: ChatRequest):
         raise HTTPException(status_code=400, detail="Message is empty")
 
     headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-    "Content-Type": "application/json"
+         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+    "Content-Type": "application/json",
+    "X-Title": "TeamSync Assistant"
     
     }
 
     body = {
-        "model": "qwen/qwen3-235b-a22b:free",
+        "model": "deepseek/deepseek-r1-0528-qwen3-8b:free",
         "messages": [
             {"role": "user", "content": payload.message}
         ]

@@ -1,14 +1,14 @@
 """
 main.py – FastAPI app startup
 """
-
+from dotenv import load_dotenv
 import os
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.openapi.utils import get_openapi
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from dotenv import load_dotenv
+
 
 from models import Base
 from database import engine
