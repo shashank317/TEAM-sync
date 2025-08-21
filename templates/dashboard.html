@@ -19,22 +19,23 @@
   </script>
   <style>
     * { font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
-    .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+    .glass { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); }
+    .card-hover:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 12px 24px rgba(0,0,0,0.15); }
   </style>
 </head>
 <body class="min-h-screen text-gray-900 dark:text-white bg-gray-100 dark:bg-black">
 
   <!-- Header -->
-  <header class="flex justify-between items-center px-6 py-6 border-b border-gray-200 dark:border-gray-700">
+  <header class="flex justify-between items-center px-6 py-6 border-b border-gray-200 dark:border-gray-700 glass shadow-md">
     <h1 class="text-3xl font-bold">📁 TeamSync</h1>
     <div class="flex gap-4 items-center">
-      <button id="darkModeToggle" onclick="toggleDarkMode()" class="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">🌗</button>
+      <button id="darkModeToggle" onclick="toggleDarkMode()" class="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center hover:scale-110 transition">🌗</button>
       <div class="relative">
-        <button onclick="toggleSettings()" class="w-9 h-9 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition flex items-center justify-center">👤</button>
-        <div id="settingsDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded shadow-lg z-50">
-          <a href="/profile" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">👤 Profile Settings</a>
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700">⚙️ Settings</a>
-          <a href="#" onclick="logout()" class="block px-4 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700">🚪 Logout</a>
+        <button onclick="toggleSettings()" class="w-9 h-9 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition flex items-center justify-center shadow-md">👤</button>
+        <div id="settingsDropdown" class="hidden absolute right-0 mt-2 w-52 glass border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+          <a href="/profile" class="block px-4 py-2 hover:bg-gray-200/30 dark:hover:bg-gray-700/30">👤 Profile Settings</a>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-200/30 dark:hover:bg-gray-700/30">⚙️ Settings</a>
+          <a href="#" onclick="logout()" class="block px-4 py-2 text-red-500 hover:bg-gray-200/30 dark:hover:bg-gray-700/30">🚪 Logout</a>
         </div>
       </div>
     </div>
@@ -42,13 +43,14 @@
 
   <!-- Main -->
   <main class="max-w-6xl mx-auto px-6 py-10 space-y-16">
+    
     <!-- Create Project -->
     <section>
       <h2 class="text-2xl font-semibold mb-4">➕ Create New Project</h2>
       <div class="grid md:grid-cols-2 gap-4">
-        <input id="title" placeholder="Project Title" class="px-4 py-3 rounded-lg border dark:border-gray-600 dark:bg-gray-800 bg-white" />
-        <input id="description" placeholder="Project Description" class="px-4 py-3 rounded-lg border dark:border-gray-600 dark:bg-gray-800 bg-white" />
-        <button onclick="createProject()" class="md:col-span-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg transition w-full">🚀 Add Project</button>
+        <input id="title" placeholder="Project Title" class="px-4 py-3 rounded-lg border dark:border-gray-600 dark:bg-gray-800 bg-white focus:ring-2 focus:ring-indigo-400" />
+        <input id="description" placeholder="Project Description" class="px-4 py-3 rounded-lg border dark:border-gray-600 dark:bg-gray-800 bg-white focus:ring-2 focus:ring-indigo-400" />
+        <button onclick="createProject()" class="md:col-span-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg transition w-full font-semibold shadow-md hover:scale-[1.02]">🚀 Add Project</button>
       </div>
     </section>
 
@@ -61,17 +63,17 @@
 
   <!-- AI Assistant -->
   <div id="ai-assistant-btn" class="fixed bottom-6 right-6 z-50">
-    <button onclick="toggleAssistant()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full shadow-xl">🤖 AI Help</button>
+    <button onclick="toggleAssistant()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full shadow-xl hover:scale-105 transition">🤖 AI Help</button>
   </div>
-  <div id="ai-chat-box" class="hidden fixed bottom-24 right-6 w-96 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-xl z-50 flex flex-col max-h-[75vh]">
+  <div id="ai-chat-box" class="hidden fixed bottom-24 right-6 w-96 glass border dark:border-gray-700 rounded-lg shadow-xl z-50 flex flex-col max-h-[75vh]">
     <div class="p-4 border-b dark:border-gray-600 font-semibold flex justify-between items-center">
       AI Assistant
       <button onclick="toggleAssistant()" class="text-gray-500 dark:text-gray-300 hover:text-red-500">✖️</button>
     </div>
     <div id="chat-messages" class="p-4 flex-1 overflow-y-auto space-y-2 text-sm"></div>
     <div class="p-3 border-t dark:border-gray-600 flex gap-2">
-      <input id="chat-input" type="text" placeholder="Ask me anything..." class="flex-1 px-3 py-2 border rounded dark:border-gray-700 dark:bg-gray-700 text-black dark:text-white" />
-      <button onclick="sendChat()" id="chat-send" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded">Send</button>
+      <input id="chat-input" type="text" placeholder="Ask me anything..." class="flex-1 px-3 py-2 border rounded dark:border-gray-700 dark:bg-gray-700 text-black dark:text-white focus:ring-2 focus:ring-indigo-400" />
+      <button onclick="sendChat()" id="chat-send" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded shadow hover:scale-105 transition">Send</button>
     </div>
   </div>
 
@@ -124,17 +126,17 @@
 
         data.forEach(project => {
           const card = document.createElement("div");
-          card.className = "bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex flex-col justify-between gap-4 border dark:border-gray-700";
+          card.className = "glass rounded-xl shadow-lg p-6 flex flex-col justify-between gap-4 border dark:border-gray-700 card-hover";
           card.innerHTML = `
             <div>
               <h3 class="text-xl font-bold">${project.title}</h3>
               <p class="text-sm text-gray-600 dark:text-gray-300 mt-2">${project.description || "No description"}</p>
             </div>
             <div class="flex flex-wrap gap-2">
-              <a href="/tasks?id=${project.id}" class="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700">📋 Tasks</a>
-              <a href="/members-page?project_id=${project.id}" class="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700">👥 Members</a>
-              <button onclick="editProject(${project.id}, '${project.title}', '${project.description}')" class="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600">✏️ Edit</button>
-              <button onclick="deleteProject(${project.id})" class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700">🗑️ Delete</button>
+              <a href="/tasks?id=${project.id}" class="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 shadow">📋 Tasks</a>
+              <a href="/members-page?project_id=${project.id}" class="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 shadow">👥 Members</a>
+              <button onclick="editProject(${project.id}, '${project.title}', '${project.description}')" class="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 shadow">✏️ Edit</button>
+              <button onclick="deleteProject(${project.id})" class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 shadow">🗑️ Delete</button>
             </div>`;
           container.appendChild(card);
         });

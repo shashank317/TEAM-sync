@@ -8,10 +8,10 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 load_dotenv()
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if not OPENROUTER_API_KEY:
-    raise RuntimeError("❌ OPENROUTER_API_KEY missing. Check .env or environment variables.")
+if not GEMINI_API_KEY:
+    raise RuntimeError("❌ GEMINI_API_KEY missing. Check .env or environment variables.")
 
 router = APIRouter(prefix="/ai", tags=["AI Assistant"])
 
@@ -24,38 +24,48 @@ async def chat(payload: ChatRequest):
         raise HTTPException(status_code=400, detail="Message is empty")
 
     headers = {
-         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-    "Content-Type": "application/json",
-    "X-Title": "TeamSync Assistant"
-    
+        "Content-Type": "application/json",
     }
 
     body = {
-        "model": "deepseek/deepseek-r1-0528-qwen3-8b:free",
-        "messages": [
-            {"role": "user", "content": payload.message}
+        "contents": [
+            {
+                "role": "user",
+                "parts": [
+                    {
+                        "text": payload.message
+                    }
+                ]
+            }
         ]
     }
 
     try:
-        print("📤 Sending to OpenRouter...")
-        print("📤 Headers:", headers)
-        print("📤 Body:", body)
+        print(f"📤 Sending to Gemini: {payload.message[:50]}...")
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=90.0) as client:
             res = await client.post(
-                "https://openrouter.ai/api/v1/chat/completions",
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}",
                 headers=headers,
                 json=body
             )
 
         print("🔧 Status Code:", res.status_code)
-        print("🔧 Response:", res.text)
 
         if res.status_code != 200:
-            raise HTTPException(status_code=res.status_code, detail=f"OpenRouter Error: {res.text}")
+            print("❌ Gemini Error:", res.text)
+            raise HTTPException(status_code=res.status_code, detail=f"Gemini Error: {res.text}")
 
-        reply = res.json()["choices"][0]["message"]["content"].strip()
+        response_data = res.json()
+        
+        # --- Safe response parsing ---
+        try:
+            reply = response_data['candidates'][0]['content']['parts'][0]['text']
+        except (KeyError, IndexError) as e:
+            print("❌ Error parsing Gemini response:", response_data)
+            raise HTTPException(status_code=500, detail="Could not parse AI response.")
+
+        print(f"🤖 Gemini Reply: {reply[:100]}...")
         return {"reply": reply}
 
     except Exception as e:

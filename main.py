@@ -23,10 +23,10 @@ from routers import assistant
 
 # ---------- Load environment ----------
 load_dotenv()
-assert os.getenv("OPENROUTER_API_KEY")," Missing OPENROUTER_API_KEY in .env file"
+assert os.getenv("GEMINI_API_KEY")," Missing GEMINI_API_KEY in .env file"
 
 # ---------- App & DB ----------
-Base.metadata.create_all(bind=engine) 
+ 
 app = FastAPI()
 
 # ---------- Static & Template Mount ----------
@@ -89,11 +89,3 @@ async def members_page(request: Request):
 @app.get("/analytics", response_class=HTMLResponse)
 async def analytics_page(request: Request):
     return templates.TemplateResponse("analytics.html", {"request": request})
-
-# assistant.py
-from fastapi import HTTPException
-import os
-
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-if not OPENROUTER_API_KEY:
-    raise HTTPException(status_code=503, detail="AI Assistant not configured. Missing API Key.")

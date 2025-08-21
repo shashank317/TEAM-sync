@@ -26,7 +26,7 @@ TeamSync is a full-featured project collaboration platform built with **FastAPI*
   - Task completion charts (pie + bar) using Chart.js
 
 - 🤖 **AI Assistant**
-  - Integrated AI Assistant powered by OpenRouter API
+  - Integrated AI Assistant powered by Gemini API
   - Chat with AI on the dashboard (working in dev, stable version deployed soon)
 
 - 👥 **Member Management**
@@ -43,7 +43,7 @@ TeamSync is a full-featured project collaboration platform built with **FastAPI*
 - **Backend:** FastAPI, SQLAlchemy, PostgreSQL
 - **Frontend:** HTML, TailwindCSS, Vanilla JS
 - **Auth:** JWT
-- **AI:** OpenRouter API
+- **AI:** Gemini API
 - **Charts:** Chart.js
 - **ORM:** SQLAlchemy
 - **Deployment Targets:** Render (first), AWS EC2 + S3 (next)
@@ -69,7 +69,7 @@ Platform	Status
 
 
 🛠️ Future Roadmap
-✅ AI Assistant (via OpenRouter)
+✅ AI Assistant (via Gemini)
 
 ✅ File attachments per task
 
@@ -82,4 +82,6 @@ Platform	Status
 🚀 Full deployment on Render or AWS
 
 🎨 Move frontend to React (component-wise)
+
+
 

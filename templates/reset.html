@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-gray-100 dark:bg-gray-900">
+<html lang="en" class="bg-gradient-to-br from-indigo-100 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
 <head>
   <meta charset="UTF-8" />
   <title>Reset Password – TeamSync</title>
@@ -11,46 +11,56 @@
       darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: { inter: ['Inter', 'sans-serif'] }
+          fontFamily: { inter: ['Inter', 'sans-serif'] },
+          animation: { fadeIn: "fadeIn 0.8s ease-in-out" },
+          keyframes: { fadeIn: { "0%": { opacity: 0, transform: "translateY(10px)" }, "100%": { opacity: 1, transform: "translateY(0)" } } }
         }
       }
     };
   </script>
   <style>
     * { font-family: 'Inter', sans-serif; }
+    .glass {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
   </style>
 </head>
-<body class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
+<body class="flex items-center justify-center min-h-screen transition-colors">
 
   <!-- Dark Mode Toggle -->
-  <button id="darkModeToggle" class="fixed top-4 right-4 p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-    <svg id="sunIcon" class="w-5 h-5 text-gray-800 dark:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <button id="darkModeToggle" class="fixed top-5 right-5 p-3 rounded-full glass shadow-lg hover:scale-105 transition-transform">
+    <svg id="sunIcon" class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
     </svg>
-    <svg id="moonIcon" class="w-5 h-5 text-gray-800 dark:text-gray-200 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg id="moonIcon" class="w-6 h-6 text-indigo-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
     </svg>
   </button>
 
-  <!-- Reset Password Form -->
-  <div class="bg-white dark:bg-gray-800 p-8 rounded-md shadow-md w-full max-w-md">
-    <h2 class="text-2xl font-bold mb-4 text-center">🔐 Reset Your Password</h2>
+  <!-- Reset Password Card -->
+  <div class="glass p-8 rounded-2xl shadow-2xl w-full max-w-md animate-fadeIn">
+    <h2 class="text-3xl font-bold mb-4 text-center text-indigo-600 dark:text-indigo-400">🔐 Reset Your Password</h2>
+    <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-6">Secure your account with a new password.</p>
 
     <div id="errorMsg" class="text-red-500 text-sm mb-3 hidden"></div>
     <div id="successMsg" class="text-green-500 text-sm mb-3 hidden"></div>
 
-    <input id="email" type="email" placeholder="Registered Email" class="w-full mb-3 px-4 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
-    <input id="newPassword" type="password" placeholder="New Password" class="w-full mb-4 px-4 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+    <input id="email" type="email" placeholder="Registered Email"
+      class="w-full mb-3 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800/50 focus:ring-2 focus:ring-indigo-400 outline-none transition" />
+    <input id="newPassword" type="password" placeholder="New Password"
+      class="w-full mb-4 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800/50 focus:ring-2 focus:ring-indigo-400 outline-none transition" />
 
-    <button onclick="resetPassword()" class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition">
+    <button onclick="resetPassword()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-3 rounded-lg shadow-lg hover:scale-105 transition-transform">
       🔄 Reset Password
     </button>
 
-    <p class="text-sm text-center mt-4">
+    <p class="text-sm text-center mt-6">
       Remembered your password?
-      <a href="/static/index.html" class="text-indigo-500 hover:underline">Login here</a>
+      <a href="/" class="text-indigo-500 hover:underline">Login here</a>
     </p>
   </div>
 
@@ -96,7 +106,7 @@
           !/[a-z]/.test(newPassword) ||
           !/[A-Z]/.test(newPassword) ||
           !/[0-9]/.test(newPassword) ||
-          !/[!@#$%^&*()\-_=+]/.test(newPassword)) {
+          !/[!@#$%^&*()\\-_=+]/.test(newPassword)) {
         showError("Password must be strong (min 8 chars, upper/lowercase, number, symbol).");
         return;
       }
