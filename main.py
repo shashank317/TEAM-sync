@@ -74,6 +74,14 @@ app.openapi = custom_openapi
 async def login(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/signup", response_class=HTMLResponse)
+async def signup(request: Request):
+    return templates.TemplateResponse("signup.html", {"request": request})
+
+@app.get("/reset", response_class=HTMLResponse)
+async def reset(request: Request):
+    return templates.TemplateResponse("reset.html", {"request": request})
+
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
