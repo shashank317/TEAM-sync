@@ -68,12 +68,12 @@ def upload_file(
     current_user: models.User = Depends(get_current_user)
 ):
     task = _owner_guard(task_id, db, current_user)
-    filename = f"{uuid4()}_{file.filename}"
-    filepath = os.path.join(UPLOAD_DIR, filename)
+    stored_name = f"{uuid4()}_{file.filename}"
+    filepath = os.path.join(UPLOAD_DIR, stored_name)
     with open(filepath, "wb") as f:
         f.write(file.file.read())
     attach = models.FileAttachment(
-        filename=file.filename,
+        filename=stored_name,
         filepath=filepath,
         task_id=task_id
     )

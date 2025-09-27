@@ -45,7 +45,7 @@ class Project(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(Text)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(Integer, ForeignKey("users.id"), index=True)
 
     owner = relationship("User", back_populates="projects")
     tasks = relationship("Task", back_populates="project",
@@ -78,7 +78,7 @@ class Task(Base):
     description = Column(Text)
     status = Column(String, default=Status.PENDING.value)
     due_date = Column(DateTime, nullable=True)
-    project_id = Column(Integer, ForeignKey("projects.id"))
+    project_id = Column(Integer, ForeignKey("projects.id"), index=True)
     assignee_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     project = relationship("Project", back_populates="tasks")
@@ -111,7 +111,7 @@ class Comment(Base):
     content = Column(Text, nullable=False)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
     user_id = Column(Integer, ForeignKey("users.id"))
-    task_id = Column(Integer, ForeignKey("tasks.id"))
+    task_id = Column(Integer, ForeignKey("tasks.id"), index=True)
 
     user = relationship("User")
     task = relationship("Task", back_populates="comments")

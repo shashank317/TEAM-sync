@@ -1,5 +1,6 @@
 from logging.config import fileConfig
 import os
+from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
 
 if not os.getenv("RENDER"):
     from dotenv import load_dotenv
@@ -19,8 +20,33 @@ from models import *
 # access to the values within the .ini file in use.
 config = context.config
 
-# set the database URL from the environment variable
-config.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
+
+def _normalize_db_url(url: str) -> str:
+    if not url:
+        return url
+    try:
+        # Upgrade deprecated scheme
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+psycopg2://", 1)
+        elif url.startswith("postgresql://") and "+psycopg2" not in url.split("//", 1)[1]:
+            url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+        parsed = urlparse(url)
+        host = parsed.hostname or ""
+        q = dict(parse_qsl(parsed.query, keep_blank_values=True))
+        if any(s in host for s in ("render.com", "neon.tech")) and "sslmode" not in q:
+            q["sslmode"] = "require"
+            parsed = parsed._replace(query=urlencode(q))
+            url = urlunparse(parsed)
+        return url
+    except Exception:
+        return url
+
+
+db_url = os.getenv("DATABASE_URL")
+if not db_url and os.getenv("USE_SQLITE", "0") == "1":
+    db_url = os.getenv("SQLITE_PATH", "sqlite:///./teamsync.db")
+
+config.set_main_option('sqlalchemy.url', _normalize_db_url(db_url))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <title>TeamSync – Organize. Collaborate. Ship.</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { inter: ['Inter', 'sans-serif'] },
+          animation: {
+            'aurora': 'aurora 60s linear infinite',
+            'fade-in-up': 'fade-in-up 1s ease-out forwards',
+            'subtle-pulse': 'subtle-pulse 2.5s infinite ease-in-out'
+          },
+          keyframes: {
+            aurora: {
+              from: { 'background-position': '0% 50%' },
+              to: { 'background-position': '200% 50%' },
+            },
+            'fade-in-up': {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            'subtle-pulse': {
+                '0%, 100%': { boxShadow: '0 0 0 0 rgba(168, 85, 247, 0.2)' },
+                '50%': { boxShadow: '0 0 0 10px rgba(168, 85, 247, 0)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .hero-glow {
+        background-image: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(124, 58, 237, 0.3), rgba(255, 255, 255, 0));
+    }
+    .aurora-bg {
+        background: radial-gradient(50% 100% at 50% 50%, rgba(29, 78, 216, 0.15) 0%, rgba(29, 78, 216, 0) 100%),
+                    radial-gradient(40% 80% at 20% 70%, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0) 100%),
+                    radial-gradient(40% 80% at 80% 30%, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 100%);
+        animation: aurora 20s infinite alternate;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-gray-200 antialiased selection:bg-purple-500/50 selection:text-white">
+
+  <!-- Background Decoratives -->
+  <div class="absolute inset-0 -z-10 h-full w-full overflow-hidden">
+    <div class="absolute -top-32 left-0 w-full h-[50rem] hero-glow"></div>
+    <div class="absolute inset-0 aurora-bg"></div>
+  </div>
+
+  <!-- Header -->
+  <header id="header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-white font-bold border border-white/20">TS</div>
+            <span class="text-xl font-extrabold tracking-tight text-white">TeamSync</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="themeToggle" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10">
+              <span class="dark:hidden">☀️</span>
+              <span class="hidden dark:inline">🌙</span>
+            </button>
+            <a id="enterBtn" href="/login" class="px-4 py-2 rounded-lg bg-white text-slate-900 hover:bg-gray-200 font-semibold text-sm transition-colors">Enter App</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 pt-32 pb-16">
+
+    <!-- Hero Section -->
+    <section class="text-center opacity-0 animate-fade-in-up">
+      <h1 class="text-4xl sm:text-6xl font-black leading-tight tracking-tighter text-white">
+        Your Team’s Hub for<br>
+        <span class="bg-gradient-to-r from-purple-500 to-cyan-400 text-transparent bg-clip-text">Seamless Collaboration</span>
+      </h1>
+      <p class="mt-6 text-lg text-gray-400 max-w-2xl mx-auto">
+        TeamSync is the lightweight project hub with Kanban tasks, analytics, and team membership—built for speed and simplicity.
+      </p>
+      <div class="mt-8 flex items-center justify-center gap-4">
+        <a id="ctaPrimary" href="/login" class="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-lg shadow-purple-600/20 animation-subtle-pulse">Get Started →</a>
+      </div>
+    </section>
+
+    <!-- Interactive UI Showcase -->
+    <section class="mt-20 opacity-0 animate-fade-in-up [animation-delay:200ms]">
+        <div class="relative w-full max-w-5xl mx-auto p-2 rounded-2xl bg-white/5 border border-white/10 shadow-2xl shadow-purple-900/20">
+             
+            <img src="/static/img/image.png" alt="TeamSync Dashboard Screenshot" class="rounded-lg w-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="mt-24 opacity-0 animate-fade-in-up [animation-delay:400ms]">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold tracking-tight text-white">Everything You Need, Nothing You Don't</h2>
+            <p class="mt-4 text-gray-400 max-w-xl mx-auto">A curated set of features designed for maximum impact and minimum friction.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="p-8 rounded-2xl bg-white/5 border border-white/10 text-center hover:-translate-y-2 transition-transform">
+                <div class="inline-block p-4 bg-purple-500/10 rounded-xl border border-purple-500/20 text-purple-400 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white">Kanban Boards</h3>
+                <p class="mt-2 text-gray-400">Visualize your workflow with intuitive drag & drop task boards.</p>
+            </div>
+            <!-- Feature 2 -->
+            <div class="p-8 rounded-2xl bg-white/5 border border-white/10 text-center hover:-translate-y-2 transition-transform">
+                <div class="inline-block p-4 bg-cyan-500/10 rounded-xl border border-cyan-500/20 text-cyan-400 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white">Project Analytics</h3>
+                <p class="mt-2 text-gray-400">Get a bird's-eye view of your project's progress and team productivity.</p>
+            </div>
+            <!-- Feature 3 -->
+            <div class="p-8 rounded-2xl bg-white/5 border border-white/10 text-center hover:-translate-y-2 transition-transform">
+                <div class="inline-block p-4 bg-pink-500/10 rounded-xl border border-pink-500/20 text-pink-400 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white">Team Management</h3>
+                <p class="mt-2 text-gray-400">Effortlessly invite and manage team members with secure invite links.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Assistant Section -->
+    <section class="mt-24 opacity-0 animate-fade-in-up [animation-delay:600ms]">
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <!-- Mock Chat Preview -->
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-5 shadow-2xl order-2 md:order-1">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-300">🤖</div>
+              <span class="text-sm text-gray-300 font-semibold">AI Assistant</span>
+            </div>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">Gemini‑powered</span>
+          </div>
+          <div class="h-64 rounded-xl bg-slate-900/40 border border-white/10 p-4 overflow-y-auto space-y-3">
+            <div class="max-w-[80%] bg-white/10 border border-white/10 rounded-lg p-3 text-sm text-gray-200">Hi! How can I help you manage projects?</div>
+            <div class="max-w-[80%] bg-purple-600/20 border border-purple-500/30 rounded-lg p-3 ml-auto text-sm text-purple-100">Summarize recent activity for project “Website Redesign”.</div>
+            <div class="max-w-[80%] bg-white/10 border border-white/10 rounded-lg p-3 text-sm text-gray-200">Here’s a quick summary: 3 tasks completed, 2 in progress, 1 overdue. I’ll suggest next actions.</div>
+          </div>
+          <div class="mt-4 flex items-center gap-2">
+            <input disabled placeholder="Ask something…" class="flex-1 rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-gray-400" />
+            <button disabled class="px-3 py-2 rounded-lg bg-purple-600/50 text-white text-sm">Send</button>
+          </div>
+        </div>
+
+        <!-- Copy + CTA -->
+        <div class="space-y-5 order-1 md:order-2">
+          <h2 class="text-4xl font-bold tracking-tight text-white">Built‑in AI Assistant</h2>
+          <p class="text-gray-400">Get instant help drafting updates, summarizing activity, planning sprints, and answering questions about your projects. The assistant lives inside the app—no context switching.</p>
+          <ul class="space-y-2 text-gray-400 text-sm">
+            <li class="flex items-start gap-2"><span class="text-purple-300">•</span><span>Summaries of tasks and activity</span></li>
+            <li class="flex items-start gap-2"><span class="text-purple-300">•</span><span>Generate task lists and acceptance criteria</span></li>
+            <li class="flex items-start gap-2"><span class="text-purple-300">•</span><span>Ask anything—status, blockers, next steps</span></li>
+          </ul>
+          <div class="pt-2">
+            <a id="aiCta" href="/login" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-lg shadow-purple-600/20">
+              Try the AI
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-7xl mx-auto px-6 py-10 text-sm text-center text-gray-500 border-t border-white/10">
+    <span>© <span id="year"></span> TeamSync. All rights reserved.</span>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Theme Toggle
+    const toggle = document.getElementById('themeToggle');
+    function applyTheme(isDark){ 
+      document.documentElement.classList.toggle('dark', isDark); 
+      localStorage.setItem('theme', isDark ? 'dark' : 'light'); 
+    }
+    (function initTheme(){ 
+      const saved = localStorage.getItem('theme'); 
+      const prefers = matchMedia('(prefers-color-scheme: dark)').matches; 
+      applyTheme(saved ? saved === 'dark' : prefers); 
+    })();
+    toggle.addEventListener('click', () => applyTheme(!document.documentElement.classList.contains('dark')));
+
+    // Redirect authenticated users
+    if (localStorage.getItem('access_token')) {
+      document.getElementById('enterBtn').href = '/dashboard';
+      document.getElementById('ctaPrimary').href = '/dashboard';
+      const aiCta = document.getElementById('aiCta');
+      if (aiCta) aiCta.href = '/dashboard';
+    }
+    
+    // Sticky header on scroll
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 10) {
+            header.classList.add('bg-slate-950/50', 'backdrop-blur-lg', 'border-b', 'border-white/10');
+        } else {
+            header.classList.remove('bg-slate-950/50', 'backdrop-blur-lg', 'border-b', 'border-white/10');
+        }
+    });
+  </script>
+</body>
+</html>

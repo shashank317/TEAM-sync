@@ -1,120 +1,367 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-gray-100 dark:bg-black">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <title>Update Profile – TeamSync</title>
+  <title>Profile Settings – TeamSync</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
-        extend: { fontFamily: { inter: ['Inter', 'sans-serif'] } }
+        extend: {
+          fontFamily: { inter: ['Inter', 'sans-serif'] },
+          animation: {
+            'aurora': 'aurora 60s linear infinite',
+            'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
+          },
+          keyframes: {
+            aurora: {
+              from: { 'background-position': '0% 50%' },
+              to: { 'background-position': '200% 50%' },
+            },
+            'fade-in-up': {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
       }
-    };
+    }
   </script>
-  <style>* { font-family: 'Inter', sans-serif; }</style>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .hero-glow {
+        background-image: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(124, 58, 237, 0.3), rgba(255, 255, 255, 0));
+    }
+    .aurora-bg {
+        background: radial-gradient(50% 100% at 50% 50%, rgba(29, 78, 216, 0.15) 0%, rgba(29, 78, 216, 0) 100%),
+                    radial-gradient(40% 80% at 20% 70%, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0) 100%),
+                    radial-gradient(40% 80% at 80% 30%, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 100%);
+        animation: aurora 20s infinite alternate;
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    .spinner{ animation:spin 1s linear infinite }
+    @keyframes spin{ to{transform:rotate(360deg)} }
+  </style>
 </head>
-<body class="text-gray-900 dark:text-white bg-gray-100 dark:bg-black min-h-screen">
-  <div class="min-h-screen px-6 py-10">
-    <div class="flex justify-between items-center mb-8">
-      <h1 class="text-3xl font-bold">👤 Update Profile</h1>
-      <div class="space-x-4">
-        <button onclick="window.location.href='/dashboard'" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition">
-          ← Dashboard
-        </button>
-        <button id="darkModeToggle" onclick="toggleDarkMode()" class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition">
-          🌙 Dark Mode
-        </button>
-      </div>
-    </div>
+<body class="bg-slate-950 text-gray-200 antialiased selection:bg-purple-500/50 selection:text-white">
 
-    <div class="max-w-md mx-auto">
-      <div class="bg-white dark:bg-gray-700 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600">
-        <div id="msgBox" class="text-sm mb-4 hidden"></div>
-
-        <div class="space-y-4">
-          <input id="name" type="text" placeholder="New Name" class="w-full px-4 py-2 border rounded-md bg-white dark:bg-gray-600 dark:border-gray-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
-          <input id="email" type="email" placeholder="New Email" class="w-full px-4 py-2 border rounded-md bg-white dark:bg-gray-600 dark:border-gray-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
-          
-          <hr class="my-4 border-gray-300 dark:border-gray-500" />
-          
-          <input id="currentPassword" type="password" placeholder="Current Password" class="w-full px-4 py-2 border rounded-md bg-white dark:bg-gray-600 dark:border-gray-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
-          <input id="newPassword" type="password" placeholder="New Password" class="w-full px-4 py-2 border rounded-md bg-white dark:bg-gray-600 dark:border-gray-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" />
-          
-          <button onclick="updateProfile()" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
-            💾 Save Changes
-          </button>
-        </div>
-      </div>
-    </div>
+  <!-- Background Decoratives -->
+  <div class="absolute inset-0 -z-10 h-full w-full overflow-hidden">
+    <div class="absolute -top-32 left-0 w-full h-[50rem] hero-glow"></div>
+    <div class="absolute inset-0 aurora-bg"></div>
   </div>
 
-  <script>
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      window.location.href = "/";
-    }
+<div class="flex h-screen">
+  <!-- Sidebar -->
+  <nav class="w-64 bg-slate-900/70 backdrop-blur-xl border-r border-white/10 flex-col p-4 hidden sm:flex">
+    <div class="flex items-center gap-3 mb-8 px-2">
+        <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-white font-bold border border-white/20">TS</div>
+        <h1 class="text-xl font-extrabold tracking-tight text-white">TeamSync</h1>
+    </div>
+    <ul class="flex-grow space-y-1">
+      <li><a href="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 100 15 7.5 7.5 0 000-15z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" /></svg>
+        Dashboard</a></li>
+      <li><a id="tasksNav" href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-1.125 0-2.062.938-2.062 2.063v7.575c0 1.125.937 2.063 2.063 2.063h9.05c1.125 0 2.063-.938 2.063-2.063V10.313A2.25 2.25 0 0013.5 8.25H8.25z" /></svg>
+        Tasks</a></li>
+    </ul>
+    <div class="border-t border-white/10 pt-4 mt-4 space-y-2">
+      <a href="/profile" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/10 text-white font-semibold text-sm border border-white/10">
+         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        Profile</a>
+      <button onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-300 text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+        Logout</button>
+    </div>
+  </nav>
 
-    function toggleDarkMode() {
-      const html = document.documentElement;
-      const isDark = html.classList.toggle('dark');
+  <!-- Main Content -->
+  <main class="flex-1 bg-transparent overflow-y-auto">
+    <header class="sticky top-0 bg-slate-950/50 backdrop-blur-lg z-10 flex items-center justify-between p-6 border-b border-white/10">
+      <h2 class="text-2xl font-bold text-white">Profile Settings</h2>
+      <button id="themeToggle" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10">
+        <span class="dark:hidden">☀️</span>
+        <span class="hidden dark:inline">🌙</span>
+    </button>
+    </header>
+
+    <div class="p-6 opacity-0 animate-fade-in-up">
+        <div class="bg-slate-900/70 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
+            <div class="p-6 border-b border-white/10 flex items-center gap-5">
+                <div id="avatarInitial" class="w-20 h-20 rounded-full bg-purple-500/20 flex items-center justify-center font-bold text-purple-300 text-4xl border-2 border-purple-400/50">?</div>
+                <div>
+                    <h2 id="profileName" class="text-2xl font-bold text-white">Loading...</h2>
+                    <p id="profileEmail" class="text-gray-400">loading@example.com</p>
+                </div>
+            </div>
+            <!-- Tabs -->
+            <div class="px-6 border-b border-white/10">
+                <nav class="flex space-x-1">
+                    <button onclick="switchTab('profile')" class="tab-button px-4 py-3 text-sm font-semibold text-white bg-white/10 rounded-t-lg">Profile</button>
+                    <button onclick="switchTab('security')" class="tab-button px-4 py-3 text-sm font-semibold text-gray-400 hover:text-white">Security</button>
+                    <button onclick="switchTab('notifications')" class="tab-button px-4 py-3 text-sm font-semibold text-gray-400 hover:text-white">Notifications</button>
+                </nav>
+            </div>
+            
+            <!-- Tab Content -->
+            <div id="profileTab" class="p-6">
+                <form id="profileForm" class="space-y-6 max-w-2xl">
+                    <div>
+                        <label for="nameInput" class="block text-sm font-medium mb-2 text-gray-300">Full Name</label>
+                        <input id="nameInput" type="text" class="w-full px-4 py-3 rounded-lg border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Your full name" />
+                    </div>
+                    <div>
+                        <label for="emailInput" class="block text-sm font-medium mb-2 text-gray-300">Email Address</label>
+                        <input id="emailInput" type="email" class="w-full px-4 py-3 rounded-lg border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-purple-500 outline-none" placeholder="you@example.com" />
+                    </div>
+                    <div class="flex justify-end pt-4 border-t border-white/10">
+                        <button id="profileSaveButton" class="w-32 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow flex items-center justify-center gap-2">
+                            <span class="button-text">Save</span>
+                            <div class="spinner w-5 h-5 border-2 border-white border-t-transparent rounded-full hidden"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="securityTab" class="p-6 hidden">
+                <form id="passwordForm" class="space-y-6 max-w-2xl">
+                    <div>
+                        <label for="currentPassword" class="block text-sm font-medium mb-2 text-gray-300">Current Password</label>
+                        <input id="currentPassword" type="password" required class="w-full px-4 py-3 rounded-lg border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-purple-500 outline-none" />
+                    </div>
+                    <div>
+                        <label for="newPassword" class="block text-sm font-medium mb-2 text-gray-300">New Password</label>
+                        <input id="newPassword" type="password" minlength="8" required class="w-full px-4 py-3 rounded-lg border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-purple-500 outline-none" />
+                    </div>
+                    <div class="flex justify-end pt-4 border-t border-white/10">
+                        <button id="passwordSaveButton" class="w-44 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow flex items-center justify-center gap-2">
+                            <span class="button-text">Update Password</span>
+                            <div class="spinner w-5 h-5 border-2 border-white border-t-transparent rounded-full hidden"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="notificationsTab" class="p-6 hidden">
+                <form id="notificationsForm" class="space-y-6 max-w-2xl">
+                    <div class="space-y-5">
+                        <label class="flex items-center justify-between cursor-pointer p-4 rounded-lg bg-white/5 hover:bg-white/10">
+                            <div>
+                                <span class="font-medium text-white">Project Invites</span>
+                                <p class="text-xs text-gray-400">When someone invites you to a project.</p>
+                            </div>
+                            <div class="relative"><input id="invitesToggle" type="checkbox" class="sr-only peer"><div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div></div>
+                        </label>
+                        <label class="flex items-center justify-between cursor-pointer p-4 rounded-lg bg-white/5 hover:bg-white/10">
+                            <div>
+                                <span class="font-medium text-white">Task Updates</span>
+                                <p class="text-xs text-gray-400">When a task assigned to you changes.</p>
+                            </div>
+                            <div class="relative"><input id="tasksToggle" type="checkbox" class="sr-only peer"><div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div></div>
+                        </label>
+                        <label class="flex items-center justify-between cursor-pointer p-4 rounded-lg bg-white/5 hover:bg-white/10">
+                            <div>
+                                <span class="font-medium text-white">Weekly Summary</span>
+                                <p class="text-xs text-gray-400">A brief summary every Monday.</p>
+                            </div>
+                            <div class="relative"><input id="summaryToggle" type="checkbox" class="sr-only peer"><div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div></div>
+                        </label>
+                    </div>
+                    <div class="flex justify-end pt-4 border-t border-white/10">
+                        <button id="notificationsSaveButton" class="w-48 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow flex items-center justify-center gap-2">
+                            <span class="button-text">Save Preferences</span>
+                            <div class="spinner w-5 h-5 border-2 border-white border-t-transparent rounded-full hidden"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed top-6 right-6 z-[100] hidden opacity-0 transition-opacity duration-300">
+  <div id="toastInner" class="px-5 py-2.5 rounded-full text-sm font-medium shadow-2xl"></div>
+</div>
+
+<script>
+  const token = localStorage.getItem('access_token');
+  if (!token) location.href = '/';
+
+  const ui = {
+    themeToggle: document.getElementById('themeToggle'),
+    avatar: document.getElementById('avatarInitial'),
+    profileName: document.getElementById('profileName'),
+    profileEmail: document.getElementById('profileEmail'),
+    nameInput: document.getElementById('nameInput'),
+    emailInput: document.getElementById('emailInput'),
+    profileForm: document.getElementById('profileForm'),
+    passwordForm: document.getElementById('passwordForm'),
+    notificationsForm: document.getElementById('notificationsForm'),
+    profileSaveBtn: document.getElementById('profileSaveButton'),
+    passwordSaveBtn: document.getElementById('passwordSaveButton'),
+    notificationsSaveBtn: document.getElementById('notificationsSaveButton'),
+    invitesToggle: document.getElementById('invitesToggle'),
+    tasksToggle: document.getElementById('tasksToggle'),
+    summaryToggle: document.getElementById('summaryToggle'),
+    currentPassword: document.getElementById('currentPassword'),
+    newPassword: document.getElementById('newPassword'),
+    toast: document.getElementById('toast'),
+    toastInner: document.getElementById('toastInner')
+  };
+
+  function applyTheme(isDark) {
+      document.documentElement.classList.toggle('dark', isDark);
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      document.getElementById("darkModeToggle").textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-    }
+  }
+  (function initTheme() {
+      const saved = localStorage.getItem('theme');
+      applyTheme(saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches);
+  })();
+  ui.themeToggle.addEventListener('click', () => applyTheme(!document.documentElement.classList.contains('dark')));
 
-    (function () {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-        document.getElementById("darkModeToggle").textContent = "☀️ Light Mode";
-      }
-    })();
+  let toastTimer;
+  function showToast(msg, type = 'info') {
+      clearTimeout(toastTimer);
+      ui.toastInner.textContent = msg;
+      ui.toastInner.className = "px-5 py-2.5 rounded-full text-sm font-medium shadow-2xl backdrop-blur-sm border";
+      if(type === 'error') ui.toastInner.classList.add('bg-red-500/80', 'text-white', 'border-red-400');
+      else if (type === 'success') ui.toastInner.classList.add('bg-green-500/80', 'text-white', 'border-green-400');
+      else ui.toastInner.classList.add('bg-slate-800/80', 'text-white', 'border-slate-600');
+      ui.toast.classList.remove('hidden');
+      requestAnimationFrame(() => ui.toast.classList.remove('opacity-0'));
+      toastTimer = setTimeout(() => {
+        ui.toast.classList.add('opacity-0');
+        setTimeout(() => ui.toast.classList.add('hidden'), 300);
+      }, 2300);
+  }
 
-    async function updateProfile() {
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const currentPassword = document.getElementById("currentPassword").value;
-      const newPassword = document.getElementById("newPassword").value;
-
-      const body = {};
-      if (name) body.name = name;
-      if (email) body.email = email;
-      if (newPassword) {
-        if (!currentPassword) {
-          return showMessage("⚠️ Enter current password to set a new one.", "error");
-        }
-        body.current_password = currentPassword;
-        body.new_password = newPassword;
-      }
-
-      const res = await fetch("/me/update", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
-        },
-        body: JSON.stringify(body)
+  window.switchTab = (tab) => {
+      document.querySelectorAll('.tab-button').forEach(b => {
+        b.classList.remove('bg-white/10', 'text-white');
+        b.classList.add('text-gray-400', 'hover:text-white');
       });
+      const activeTab = document.querySelector(`[onclick="switchTab('${tab}')"]`);
+      activeTab.classList.add('bg-white/10', 'text-white');
+      activeTab.classList.remove('text-gray-400', 'hover:text-white');
+      ['profile', 'security', 'notifications'].forEach(t => document.getElementById(t + 'Tab').classList.toggle('hidden', t !== tab));
+  };
 
-      const msg = document.getElementById("msgBox");
-      if (res.ok) {
-        showMessage("✅ Profile updated successfully", "success");
-        document.getElementById("currentPassword").value = "";
-        document.getElementById("newPassword").value = "";
-      } else {
-        const data = await res.json();
-        showMessage(data.detail || "❌ Something went wrong.", "error");
+  function setBtnLoading(btn, state) {
+      const text = btn.querySelector('.button-text');
+      const sp = btn.querySelector('.spinner');
+      if (!text || !sp) return;
+      text.classList.toggle('hidden', state);
+      sp.classList.toggle('hidden', !state);
+      btn.disabled = state;
+  }
+
+  async function loadProfile() {
+      try {
+          const res = await fetch('/users/me', { headers: { Authorization: 'Bearer ' + token } });
+          if (res.status === 401) { location.href = '/'; return; }
+          if (!res.ok) throw new Error('Failed to load profile');
+          const data = await res.json();
+          ui.avatar.textContent = (data.username || data.email || '?').charAt(0).toUpperCase();
+          ui.profileName.textContent = data.username || 'User';
+          ui.profileEmail.textContent = data.email || '';
+          ui.nameInput.value = data.username || '';
+          ui.emailInput.value = data.email || '';
+          const notif = JSON.parse(localStorage.getItem('notif_prefs') || '{}');
+          ui.invitesToggle.checked = notif.invites !== false;
+          ui.tasksToggle.checked = notif.tasks !== false;
+          ui.summaryToggle.checked = notif.summary === true;
+      } catch (e) {
+          showToast('Failed to load profile data', 'error');
       }
-    }
+  }
+  
+  function logout(){
+    localStorage.removeItem('access_token');
+    fetch('/auth/logout', { method: 'POST' }).finally(() => { window.location.href = '/'; });
+  }
 
-    function showMessage(msg, type) {
-      const box = document.getElementById("msgBox");
-      box.textContent = msg;
-      box.className = "text-sm mb-4 " + (type === "success" ? "text-green-500" : "text-red-500");
-      box.classList.remove("hidden");
+  ui.profileForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = ui.nameInput.value.trim();
+      const email = ui.emailInput.value.trim();
+      if (!name && !email) return;
+      setBtnLoading(ui.profileSaveBtn, true);
+      try {
+          const payload = {};
+          if (name) payload.name = name;
+          if (email) payload.email = email;
+          const res = await fetch('/users/me', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(payload) });
+          if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.detail || 'Update failed'); }
+          showToast('Profile saved successfully', 'success');
+          await loadProfile();
+      } catch (err) {
+          showToast(err.message, 'error');
+      } finally {
+          setBtnLoading(ui.profileSaveBtn, false);
+      }
+  });
+
+  ui.passwordForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const current = ui.currentPassword.value;
+      const next = ui.newPassword.value;
+      if (next.length < 8) { showToast('New password must be at least 8 characters', 'error'); return; }
+      setBtnLoading(ui.passwordSaveBtn, true);
+      try {
+          const res = await fetch('/users/me', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ current_password: current, new_password: next }) });
+          if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.detail || 'Password update failed'); }
+          showToast('Password updated successfully', 'success');
+          ui.passwordForm.reset();
+      } catch (err) {
+          showToast(err.message, 'error');
+      } finally {
+          setBtnLoading(ui.passwordSaveBtn, false);
+      }
+  });
+
+  ui.notificationsForm.addEventListener('submit', e => {
+      e.preventDefault();
+      setBtnLoading(ui.notificationsSaveBtn, true);
+      const prefs = { invites: ui.invitesToggle.checked, tasks: ui.tasksToggle.checked, summary: ui.summaryToggle.checked };
+      localStorage.setItem('notif_prefs', JSON.stringify(prefs));
+      setTimeout(() => {
+          showToast('Notification preferences saved', 'success');
+          setBtnLoading(ui.notificationsSaveBtn, false);
+      }, 500);
+  });
+  
+  (async function init() {
+    await loadProfile();
+    // Enable other nav links based on first project
+    try {
+        const res = await fetch('/projects', { headers: { Authorization: 'Bearer ' + token } });
+        if (res.ok) {
+            const projects = await res.json();
+            const firstProjectId = projects.length > 0 ? projects[0].id : null;
+            const tasksNav = document.getElementById('tasksNav');
+            if (tasksNav) {
+                tasksNav.onclick = (e) => {
+                    e.preventDefault();
+                    if(firstProjectId) window.location.href = `/tasks?id=${firstProjectId}`;
+                    else showToast('Create a project to view tasks', 'info');
+                }
+            }
+        }
+    } catch(e) {
+        console.error("Could not fetch projects for nav links");
     }
-  </script>
+  })();
+</script>
 </body>
 </html>

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-gradient-to-br from-indigo-100 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <title>Sign Up – TeamSync</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -12,125 +14,211 @@
       theme: {
         extend: {
           fontFamily: { inter: ['Inter', 'sans-serif'] },
-          animation: { fadeIn: "fadeIn 0.8s ease-in-out" },
-          keyframes: { fadeIn: { "0%": { opacity: 0, transform: "translateY(10px)" }, "100%": { opacity: 1, transform: "translateY(0)" } } }
+          animation: {
+            'aurora': 'aurora 60s linear infinite',
+            'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
+          },
+          keyframes: {
+            aurora: {
+              from: { 'background-position': '0% 50%' },
+              to: { 'background-position': '200% 50%' },
+            },
+            'fade-in-up': {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
         }
       }
-    };
+    }
   </script>
   <style>
-    * { font-family: 'Inter', sans-serif; }
-    .glass {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+    body { font-family: 'Inter', sans-serif; }
+    .hero-glow {
+        background-image: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(124, 58, 237, 0.3), rgba(255, 255, 255, 0));
     }
+    .aurora-bg {
+        background: radial-gradient(50% 100% at 50% 50%, rgba(29, 78, 216, 0.15) 0%, rgba(29, 78, 216, 0) 100%),
+                    radial-gradient(40% 80% at 20% 70%, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0) 100%),
+                    radial-gradient(40% 80% at 80% 30%, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 100%);
+        animation: aurora 20s infinite alternate;
+    }
+    .strength-check.valid { color: #818cf8; } /* Lighter purple for dark mode */
+    .strength-check.valid svg { stroke: #818cf8; }
+    .strength-check.invalid { color: #6b7280; } /* Muted gray for dark mode */
+    .strength-check.invalid svg { stroke: #6b7280; }
+    @keyframes spin { to { transform: rotate(360deg) } }
+    .spinner { animation: spin 1s linear infinite }
   </style>
 </head>
-<body class="flex items-center justify-center min-h-screen transition-colors">
+<body class="bg-slate-950 text-gray-200 antialiased selection:bg-purple-500/50 selection:text-white">
 
-  <!-- Dark Mode Toggle -->
-  <button id="darkModeToggle" class="fixed top-5 right-5 p-3 rounded-full glass shadow-lg hover:scale-105 transition-transform">
-    <svg id="sunIcon" class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-    </svg>
-    <svg id="moonIcon" class="w-6 h-6 text-indigo-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-    </svg>
-  </button>
+  <!-- Background Decoratives -->
+  <div class="absolute inset-0 -z-10 h-full w-full overflow-hidden">
+    <div class="absolute -top-32 left-0 w-full h-[50rem] hero-glow"></div>
+    <div class="absolute inset-0 aurora-bg"></div>
+  </div>
 
-  <!-- Signup Card -->
-  <div class="glass p-8 rounded-2xl shadow-2xl w-full max-w-md animate-fadeIn">
-    <h2 class="text-3xl font-bold mb-6 text-center text-indigo-600 dark:text-indigo-400">📝 Create Your Account</h2>
-    <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-6">Join TeamSync and collaborate smarter.</p>
+  <div class="min-h-screen w-full flex items-center justify-center p-4">
+    <div class="w-full max-w-6xl grid lg:grid-cols-5 gap-8">
+      
+      <!-- Left Column: Info -->
+      <div class="hidden lg:flex lg:col-span-3 flex-col justify-center animate-fade-in-up">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white font-bold border border-white/20">TS</div>
+            <span class="text-2xl font-extrabold tracking-tight text-white">TeamSync</span>
+        </div>
+        <h1 class="text-4xl font-bold tracking-tight text-white mt-6">
+            The Ultimate Project Hub for Modern Teams.
+        </h1>
+        <p class="mt-4 text-lg text-gray-400">
+            Go from idea to launch faster. TeamSync provides everything you need to manage projects, without the complexity.
+        </p>
+        <div class="mt-8 bg-slate-900/50 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+            <p class="text-sm text-gray-300">"TeamSync has streamlined our entire workflow. The Kanban board and analytics are game-changers for keeping our projects on track."</p>
+            <div class="mt-4 flex items-center gap-3">
+                <img src="https://placehold.co/40x40/a855f7/ffffff?text=AV&font=inter" alt="Avatar" class="w-10 h-10 rounded-full border-2 border-purple-400">
+                <div>
+                    <p class="font-semibold text-white">Alex Volkov</p>
+                    <p class="text-xs text-gray-400">Lead Developer, TechCorp</p>
+                </div>
+            </div>
+        </div>
+      </div>
 
-    <div id="errorMsg" class="text-red-500 text-sm mb-4 hidden"></div>
+      <!-- Right Column: Signup Card -->
+      <div class="relative bg-slate-900/70 backdrop-blur-xl p-8 sm:p-10 rounded-2xl shadow-2xl w-full lg:col-span-2 border border-white/10 animate-fade-in-up" style="animation-delay: 200ms;">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight text-white">Create Account</h1>
+            <p class="text-gray-400 mt-2 text-sm">Join TeamSync to start collaborating.</p>
+        </div>
 
-    <input id="name" type="text" placeholder="Full Name" autofocus
-      class="w-full mb-3 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800/50 focus:ring-2 focus:ring-indigo-400 outline-none transition" />
-    <input id="email" type="email" placeholder="Email"
-      class="w-full mb-3 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800/50 focus:ring-2 focus:ring-indigo-400 outline-none transition" />
-    <input id="password" type="password" placeholder="Password"
-      class="w-full mb-5 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800/50 focus:ring-2 focus:ring-indigo-400 outline-none transition" />
+        <form class="space-y-5" onsubmit="handleSignup(event)">
+            <input id="nameInput" type="text" placeholder="Full Name" autocomplete="name" required class="w-full px-4 py-3 rounded-lg border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-purple-500 outline-none" />
+            <input id="emailInput" type="email" placeholder="Email Address" autocomplete="email" required class="w-full px-4 py-3 rounded-lg border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-purple-500 outline-none" />
+            <input id="passwordInput" type="password" placeholder="Password" autocomplete="new-password" required class="w-full px-4 py-3 rounded-lg border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-purple-500 outline-none" />
 
-    <button onclick="signup()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-3 rounded-lg shadow-lg hover:scale-105 transition-transform">
-      ✅ Sign Up
-    </button>
+            <div id="strength-checker" class="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 text-xs">
+                <p id="check-length" class="strength-check invalid flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>8+ characters</p>
+                <p id="check-lower" class="strength-check invalid flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Lowercase</p>
+                <p id="check-uppercase" class="strength-check invalid flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Uppercase</p>
+                <p id="check-number" class="strength-check invalid flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Number</p>
+                <p id="check-symbol" class="strength-check invalid flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Symbol</p>
+            </div>
 
-    <p class="text-sm text-center mt-6">
-      Already have an account?
-      <a href="/" class="text-indigo-500 hover:underline">Login</a>
-    </p>
+            <button id="signupButton" type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg shadow-lg font-semibold flex items-center justify-center">
+                <span class="button-text">Create Account</span>
+                <div class="spinner w-5 h-5 border-2 border-white border-t-transparent rounded-full hidden"></div>
+            </button>
+        </form>
+
+        <div class="text-center mt-6">
+            <p class="text-sm text-gray-400">Already have an account? <a href="/login" class="text-purple-400 hover:underline font-semibold">Sign In</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed top-6 right-6 z-[100] hidden opacity-0 transition-opacity duration-300">
+    <div id="toastInner" class="px-5 py-2.5 rounded-full text-sm font-medium shadow-2xl"></div>
   </div>
 
   <script>
-    const toggle = document.getElementById('darkModeToggle');
-    const html = document.documentElement;
-    const sunIcon = document.getElementById('sunIcon');
-    const moonIcon = document.getElementById('moonIcon');
+    const ui = {
+      nameInput: document.getElementById('nameInput'),
+      emailInput: document.getElementById('emailInput'),
+      passwordInput: document.getElementById('passwordInput'),
+      signupButton: document.getElementById('signupButton'),
+      toast: document.getElementById('toast'),
+      toastInner: document.getElementById('toastInner'),
+      strength: {
+        length: document.getElementById('check-length'),
+        lower: document.getElementById('check-lower'),
+        upper: document.getElementById('check-uppercase'),
+        number: document.getElementById('check-number'),
+        symbol: document.getElementById('check-symbol')
+      }
+    };
 
-    function initializeDarkMode() {
-      const saved = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const useDark = saved === 'dark' || (!saved && prefersDark);
-      html.classList.toggle('dark', useDark);
-      sunIcon.classList.toggle('hidden', useDark);
-      moonIcon.classList.toggle('hidden', !useDark);
+    let toastTimer;
+    function showToast(msg, type = 'error') {
+        clearTimeout(toastTimer);
+        ui.toastInner.textContent = msg;
+        ui.toastInner.className = "px-5 py-2.5 rounded-full text-sm font-medium shadow-2xl backdrop-blur-sm border";
+        if (type === 'error') ui.toastInner.classList.add('bg-red-500/80', 'text-white', 'border-red-400');
+        else if (type === 'success') ui.toastInner.classList.add('bg-green-500/80', 'text-white', 'border-green-400');
+        ui.toast.classList.remove('hidden');
+        requestAnimationFrame(() => ui.toast.classList.remove('opacity-0'));
+        toastTimer = setTimeout(() => {
+            ui.toast.classList.add('opacity-0');
+            setTimeout(() => ui.toast.classList.add('hidden'), 300);
+        }, 3000);
     }
 
-    toggle.addEventListener('click', () => {
-      const isDark = html.classList.toggle('dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      sunIcon.classList.toggle('hidden', isDark);
-      moonIcon.classList.toggle('hidden', !isDark);
-    });
+    function setBtnLoading(on) {
+      ui.signupButton.querySelector('.button-text').classList.toggle('hidden', on);
+      ui.signupButton.querySelector('.spinner').classList.toggle('hidden', !on);
+      ui.signupButton.disabled = on;
+    }
 
-    initializeDarkMode();
+    function validatePassword() {
+      const pwd = ui.passwordInput.value;
+      const checks = {
+        length: pwd.length >= 8,
+        lower: /[a-z]/.test(pwd),
+        upper: /[A-Z]/.test(pwd),
+        number: /\d/.test(pwd),
+        symbol: /[!@#$%^&*]/.test(pwd)
+      };
+      let allValid = true;
+      Object.entries(checks).forEach(([key, isValid]) => {
+        const el = ui.strength[key];
+        el.classList.toggle('valid', isValid);
+        el.classList.toggle('invalid', !isValid);
+        if (!isValid) allValid = false;
+      });
+      return allValid;
+    }
+    ui.passwordInput.addEventListener('input', validatePassword);
 
-    async function signup() {
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const errorBox = document.getElementById("errorMsg");
-      errorBox.classList.add("hidden");
-
-      if (!name || !email || !password) return showError("All fields are required.");
-
-      if (password.length < 8 ||
-        !/[a-z]/.test(password) ||
-        !/[A-Z]/.test(password) ||
-        !/[0-9]/.test(password) ||
-        !/[!@#$%^&*()\-_=+]/.test(password)) {
-        return showError("Password must be strong (min 8 chars, upper/lowercase, number, symbol).");
+    async function handleSignup(e) {
+      e.preventDefault();
+      if (!validatePassword()) {
+        showToast('Please use a stronger password');
+        return;
       }
-
+      const name = ui.nameInput.value.trim();
+      const email = ui.emailInput.value.trim();
+      const password = ui.passwordInput.value;
+      if (!name || !email) {
+        showToast('All fields are required');
+        return;
+      }
+      setBtnLoading(true);
       try {
-        const res = await fetch("/auth/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password })
         });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          localStorage.setItem("access_token", data.access_token);
-          window.location.href = "/dashboard";
-        } else {
-          showError(data.detail || "Signup failed.");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.detail || 'Signup failed. Please try again.');
         }
+        localStorage.setItem('access_token', data.access_token);
+        showToast('Account created! Redirecting…', 'success');
+        setTimeout(() => window.location.href = '/dashboard', 1000);
       } catch (err) {
-        showError("Network error. Please try again.");
+        showToast(err.message || 'An unexpected error occurred.');
+      } finally {
+        setBtnLoading(false);
       }
     }
 
-    function showError(msg) {
-      const box = document.getElementById("errorMsg");
-      box.textContent = msg;
-      box.classList.remove("hidden");
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+      validatePassword();
+    });
   </script>
 </body>
 </html>

@@ -6,12 +6,13 @@ from datetime import datetime, timedelta
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 from jose import jwt, JWTError
 from pydantic import BaseModel
 
 from database import get_db
 from models import Project, ProjectMember, User
-from auth import get_current_user, SECRET_KEY, ALGORITHM
+from auth import get_current_user, get_current_user_optional, SECRET_KEY, ALGORITHM
 
 router = APIRouter(
     prefix="/projects/{project_id}",
@@ -52,6 +53,21 @@ def _project_owned(project_id: int, db, user: User) -> Project:
     return proj
 
 
+def _project_member_or_owner(project_id: int, db, user: User) -> Project:
+    """Return project if the user is owner or a member, else 403.
+
+    Used for read operations that should be visible to any project participant.
+    """
+    proj = db.query(Project).filter(Project.id == project_id).first()
+    if not proj:
+        raise HTTPException(404, "Project not found")
+    if proj.owner_id == user.id:
+        return proj
+    if db.query(ProjectMember).filter_by(project_id=project_id, user_id=user.id).first():
+        return proj
+    raise HTTPException(403, "Forbidden")
+
+
 # ---------- Endpoints ----------
 
 @router.post("/members", response_model=MemberOut)
@@ -87,7 +103,7 @@ def list_members(
     db=Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    proj = _project_owned(project_id, db, current_user)
+    proj = _project_member_or_owner(project_id, db, current_user)
     rows = db.query(ProjectMember, User).join(
         User, ProjectMember.user_id == User.id
     ).filter(ProjectMember.project_id == project_id).all()
@@ -177,3 +193,38 @@ def join_via_token(
     ))
     db.commit()
     return {"message": "Joined project"}
+
+
+@router.get("/members/join")
+def join_via_token_get(
+    project_id: int,
+    token: str,
+    fresh: bool | None = False,
+    db=Depends(get_db),
+    current_user: User | None = Depends(get_current_user_optional)
+):
+    # Always force a login first to ensure the person accepting uses their own credentials.
+    # We append fresh=1 to avoid redirect loops.
+    if not fresh:
+        next_url = f"/projects/{project_id}/members/join?token={token}&fresh=1"
+        return RedirectResponse(url=f"/login?next={next_url}&prompt=login", status_code=303)
+    # Now we require an authenticated user (after login redirect)
+    if not current_user:
+        return RedirectResponse(url=f"/login?next=/projects/{project_id}/members/join?token={token}&fresh=1&prompt=login", status_code=303)
+    # Validate token then add membership
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("project_id") != project_id:
+            raise JWTError()
+    except JWTError:
+        raise HTTPException(400, "Invalid or expired invite")
+    if not db.query(ProjectMember).filter_by(
+        project_id=project_id, user_id=current_user.id
+    ).first():
+        db.add(ProjectMember(
+            user_id=current_user.id,
+            project_id=project_id,
+            role="member"
+        ))
+        db.commit()
+    return RedirectResponse(url=f"/members?project_id={project_id}", status_code=303)

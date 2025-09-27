@@ -5,13 +5,14 @@ routers/projects.py – owns projects & project-scoped tasks upload
 import os
 import shutil
 from datetime import datetime
+from uuid import uuid4
 from typing import List
 
 from fastapi import (
     APIRouter, Depends, HTTPException,
     UploadFile, File, Form
 )
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from database import get_db
 from auth import get_current_user
 import models, schemas
@@ -116,11 +117,12 @@ def create_task(
 
     # optional file upload
     if file:
-        filepath = os.path.join(UPLOAD_DIR, file.filename)
+        stored_name = f"{uuid4()}_{file.filename}"
+        filepath = os.path.join(UPLOAD_DIR, stored_name)
         with open(filepath, "wb") as buf:
             shutil.copyfileobj(file.file, buf)
         attach = models.FileAttachment(
-            filename=file.filename,
+            filename=stored_name,
             filepath=filepath,
             task_id=task.id
         )
@@ -141,7 +143,16 @@ def list_tasks(
     if not project or project.owner_id != current_user.id:
         raise HTTPException(404, "Project not found or unauthorized")
 
-    tasks = db.query(models.Task).filter_by(project_id=project_id).all()
+    # Eager load attachments and comments->user to avoid N+1 lazy loads
+    tasks = (
+        db.query(models.Task)
+        .options(
+            joinedload(models.Task.attachments),
+            joinedload(models.Task.comments).joinedload(models.Comment.user)
+        )
+        .filter_by(project_id=project_id)
+        .all()
+    )
 
     task_outputs = []
     for task in tasks:

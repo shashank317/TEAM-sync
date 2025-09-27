@@ -1,329 +1,403 @@
-<!-- templates/tasks.html -->
 <!DOCTYPE html>
-<html lang="en" class="bg-gray-100 dark:bg-black">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <title>Tasks – TeamSync</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { inter: ['Inter', 'sans-serif'] }
-        }
-      }
-    };
+    tailwind.config = { darkMode:'class', theme:{ extend:{ fontFamily:{ inter:['Inter','sans-serif'] }, colors:{ slate:{950:'#020617'}, cyan:{400:'#22d3ee',500:'#06b6d4'} }, keyframes:{ fadeIn:{'0%':{opacity:'0',transform:'scale(.95)'},'100%':{opacity:'1',transform:'scale(1)'}}, slideUp:{'0%':{opacity:'0',transform:'translateY(10px)'},'100%':{opacity:'1',transform:'translateY(0)'}} }, animation:{ fadeIn:'fadeIn .3s ease-out', slideUp:'slideUp .35s ease-out' } } } };
   </script>
   <style>
-    * {
-      font-family: 'Inter', sans-serif;
-    }
+    * { font-family: 'Inter', sans-serif; }
+    .glass { background: rgba(15,23,42,0.72); backdrop-filter: blur(14px); border:1px solid rgba(255,255,255,0.08); }
+    .kanban-column::-webkit-scrollbar { width: 6px; }
+    .kanban-column::-webkit-scrollbar-track { background: transparent; }
+    .kanban-column::-webkit-scrollbar-thumb { background: rgba(71,85,105,.5); border-radius:3px; }
+    .task-card.dragging { opacity:.45; transform: scale(1.05); }
+    .drag-over { background: rgba(6,182,212,0.12); border-style:dashed; }
+    .skeleton { position:relative; overflow:hidden; background:linear-gradient(90deg,#1e293b 25%,#243654 37%,#1e293b 63%); background-size:400% 100%; animation:shimmer 2s infinite; }
+    @keyframes shimmer { 0%{background-position:100% 0} 100%{background-position:0 0} }
   </style>
 </head>
-<body class="text-gray-900 dark:text-white bg-gray-100 dark:bg-black min-h-screen">
-  <div class="min-h-screen px-6 py-10">
-    <div class="max-w-4xl mx-auto">
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold" id="projectTitle">📝 Project</h1>
-        <div class="space-x-4">
-          <a id="analyticsLink" href="#" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">📈 Analytics</a>
-          <a id="membersLink" href="#" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition">👥 Manage Members</a>
-          <button onclick="goBack()" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition">← Dashboard</button>
-          <button id="darkModeToggle" onclick="toggleDarkMode()" class="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition">🌙 Dark Mode</button>
+<body class="bg-slate-950 text-gray-200 min-h-screen">
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-5 right-5 px-5 py-3 rounded-lg shadow-lg text-sm font-medium bg-slate-800/90 border border-slate-700 flex items-center gap-3 translate-x-[140%] transition-transform z-50">
+    <span id="toastIcon">⚠️</span>
+    <span id="toastMsg">Message</span>
+  </div>
+
+  <!-- Main Container -->
+  <div class="min-h-screen p-4 sm:p-6 lg:p-8">
+    <div class="max-w-screen-2xl mx-auto">
+      <!-- Header -->
+      <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-white" id="projectTitle">🚀 Project</h1>
+          <p class="text-sm text-gray-400">Drag & drop tasks or click to edit.</p>
+        </div>
+        <div class="flex items-center flex-wrap gap-2">
+          <button id="addTaskBtn" class="flex items-center gap-2 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition shadow-lg shadow-cyan-500/20">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            New Task
+          </button>
+          <a id="analyticsLink" href="#" class="flex items-center gap-2 px-4 py-2 bg-slate-800/80 text-white rounded-lg hover:bg-slate-700 transition border border-slate-700">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            Analytics
+          </a>
+          <a id="membersLink" href="#" class="flex items-center gap-2 px-4 py-2 bg-slate-800/80 text-white rounded-lg hover:bg-slate-700 transition border border-slate-700">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Members
+          </a>
+          <button id="dashboardBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-800/80 text-white rounded-lg hover:bg-slate-700 transition border border-slate-700" title="Back to Dashboard">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button id="themeToggle" class="flex items-center gap-2 px-4 py-2 bg-slate-800/80 text-white rounded-lg hover:bg-slate-700 transition border border-slate-700" title="Toggle dark mode">🌗</button>
+        </div>
+      </header>
+
+      <!-- Kanban Board -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="board">
+        <!-- Column Template Instances -->
+        <div class="bg-slate-900/50 rounded-xl border border-slate-800 p-4 flex flex-col" data-status="pending">
+          <h2 class="font-semibold mb-4 flex items-center justify-between text-yellow-400">
+            <span class="flex items-center gap-2">🕒 Pending</span>
+            <span id="pending-count" class="text-sm bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded-full">0</span>
+          </h2>
+          <div class="flex-1 kanban-column space-y-4 overflow-y-auto p-1 h-96" id="pending-tasks"></div>
+          <div class="column-empty hidden text-xs text-gray-500 text-center py-4">No tasks here.</div>
+        </div>
+        <div class="bg-slate-900/50 rounded-xl border border-slate-800 p-4 flex flex-col" data-status="in-progress">
+          <h2 class="font-semibold mb-4 flex items-center justify-between text-blue-400">
+            <span class="flex items-center gap-2">🚧 In Progress</span>
+            <span id="inprogress-count" class="text-sm bg-blue-400/10 text-blue-400 px-2 py-0.5 rounded-full">0</span>
+          </h2>
+          <div class="flex-1 kanban-column space-y-4 overflow-y-auto p-1 h-96" id="inprogress-tasks"></div>
+          <div class="column-empty hidden text-xs text-gray-500 text-center py-4">No tasks here.</div>
+        </div>
+        <div class="bg-slate-900/50 rounded-xl border border-slate-800 p-4 flex flex-col" data-status="done">
+          <h2 class="font-semibold mb-4 flex items-center justify-between text-green-400">
+            <span class="flex items-center gap-2">✅ Done</span>
+            <span id="done-count" class="text-sm bg-green-400/10 text-green-400 px-2 py-0.5 rounded-full">0</span>
+          </h2>
+            <div class="flex-1 kanban-column space-y-4 overflow-y-auto p-1 h-96" id="done-tasks"></div>
+            <div class="column-empty hidden text-xs text-gray-500 text-center py-4">No tasks here.</div>
         </div>
       </div>
+      <!-- Global Loading / Error States -->
+      <div id="loadingState" class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6 hidden">
+        <div class="space-y-4"> <div class="skeleton h-24 rounded-lg"></div><div class="skeleton h-24 rounded-lg"></div></div>
+        <div class="space-y-4"> <div class="skeleton h-24 rounded-lg"></div><div class="skeleton h-24 rounded-lg"></div></div>
+        <div class="space-y-4"> <div class="skeleton h-24 rounded-lg"></div><div class="skeleton h-24 rounded-lg"></div></div>
+      </div>
+      <div id="errorState" class="hidden mt-8 text-center text-red-400 text-sm">Failed to load tasks. <button id="retryBtn" class="underline">Retry</button></div>
+    </div>
+  </div>
 
-      <!-- Add Task Form -->
-      <div class="mb-10">
-        <h2 class="text-xl font-semibold mb-2">Add New Task</h2>
-        <div class="space-y-2">
-          <input id="taskTitle" placeholder="Task Title" class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white" />
-          <input id="taskDesc" placeholder="Task Description" class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white" />
-          <input type="date" id="taskDue" class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white" />
-          <select id="taskStatus" class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white">
+  <!-- Add/Edit Task Modal -->
+  <div id="taskModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-40 animate-fadeIn">
+    <div class="glass p-6 rounded-xl w-full max-w-md shadow-2xl m-4 border border-slate-700">
+      <h3 id="modalTitle" class="text-xl font-bold mb-6 text-white">Add New Task</h3>
+      <div class="space-y-4">
+        <input id="taskTitleInput" placeholder="Task Title" class="w-full px-4 py-2 rounded-lg bg-slate-800/80 border border-slate-700 focus:ring-2 focus:ring-cyan-500 outline-none text-white" />
+        <textarea id="taskDescInput" placeholder="Description" class="w-full px-4 py-2 rounded-lg bg-slate-800/80 border border-slate-700 focus:ring-2 focus:ring-cyan-500 outline-none text-white" rows="3"></textarea>
+        <div>
+          <label class="text-xs uppercase tracking-wide text-gray-400">Due Date</label>
+          <input type="date" id="taskDueInput" class="mt-1 w-full px-4 py-2 rounded-lg bg-slate-800/80 border border-slate-700 focus:ring-2 focus:ring-cyan-500 outline-none text-white" />
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-wide text-gray-400">Status</label>
+          <select id="taskStatusInput" class="mt-1 w-full px-4 py-2 rounded-lg bg-slate-800/80 border border-slate-700 focus:ring-2 focus:ring-cyan-500 outline-none text-white">
             <option value="pending">Pending</option>
             <option value="in-progress">In Progress</option>
             <option value="done">Done</option>
           </select>
-          <input type="file" id="taskFile" class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white" />
-          <button onclick="createTask()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">➕ Add Task</button>
+        </div>
+        <div id="fileUploadContainer">
+          <label class="text-xs uppercase tracking-wide text-gray-400">Attachment</label>
+          <input type="file" id="taskFileInput" class="mt-1 w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-cyan-500/10 file:text-cyan-400 hover:file:bg-cyan-500/20" />
         </div>
       </div>
-
-      <!-- Tasks List -->
-      <div>
-        <h2 class="text-xl font-semibold mb-4">Your Tasks</h2>
-        <div id="taskList" class="space-y-4"></div>
+      <div class="flex justify-end gap-4 mt-8">
+        <button id="cancelModalBtn" class="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition">Cancel</button>
+        <button id="modalSubmitButton" class="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition">Save</button>
       </div>
     </div>
   </div>
 
-  <!-- Edit Modal -->
-  <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
-    <div class="bg-white dark:bg-gray-700 p-6 rounded-lg w-full max-w-md border dark:border-gray-600">
-      <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-white">Edit Task</h3>
-      <input id="editTitle" class="w-full mb-2 px-3 py-2 border rounded-md bg-white dark:bg-gray-600 text-gray-900 dark:text-white" placeholder="Title" />
-      <input id="editDesc" class="w-full mb-2 px-3 py-2 border rounded-md bg-white dark:bg-gray-600 text-gray-900 dark:text-white" placeholder="Description" />
-      <input type="date" id="editDue" class="w-full mb-2 px-3 py-2 border rounded-md bg-white dark:bg-gray-600 text-gray-900 dark:text-white" />
-      <select id="editStatus" class="w-full mb-4 px-3 py-2 border rounded-md bg-white dark:bg-gray-600 text-gray-900 dark:text-white">
-        <option value="pending">Pending</option>
-        <option value="in-progress">In Progress</option>
-        <option value="done">Done</option>
-      </select>
-      <div class="flex justify-between">
-        <button onclick="closeModal()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition">Cancel</button>
-        <button onclick="submitEdit()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Save Changes</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- JS -->
   <script>
-    const token = localStorage.getItem("access_token");
-    const urlParams = new URLSearchParams(window.location.search);
-    const projectId = urlParams.get("id");
-    let editingTaskId = null;
+    // -------------- Core State & Elements --------------
+    const token = localStorage.getItem('access_token');
+    const qs = new URLSearchParams(location.search); 
+    const projectId = qs.get('id');
+    if(!token || !projectId){ location.href='/'; }
 
-    if (!token || !projectId) {
-      window.location.href = "/";
-    }
-
-    // ✅ Fixed link
-    document.getElementById("analyticsLink").href = `/analytics?id=${projectId}`;
-    document.getElementById("membersLink").href = `/members?project_id=${projectId}`;
-
-    function goBack() {
-      window.location.href = "/dashboard";
-    }
-
-    function toggleDarkMode() {
-      const html = document.documentElement;
-      const isDark = html.classList.toggle('dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      document.getElementById("darkModeToggle").textContent = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-    }
-
-    (function () {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-        document.getElementById("darkModeToggle").textContent = "☀️ Light Mode";
+    const ui = {
+      projectTitle: document.getElementById('projectTitle'),
+      analyticsLink: document.getElementById('analyticsLink'),
+      membersLink: document.getElementById('membersLink'),
+      addTaskBtn: document.getElementById('addTaskBtn'),
+      taskModal: document.getElementById('taskModal'),
+      modalTitle: document.getElementById('modalTitle'),
+      modalSubmit: document.getElementById('modalSubmitButton'),
+      cancelModal: document.getElementById('cancelModalBtn'),
+      fileUploadContainer: document.getElementById('fileUploadContainer'),
+      titleInput: document.getElementById('taskTitleInput'),
+      descInput: document.getElementById('taskDescInput'),
+      dueInput: document.getElementById('taskDueInput'),
+      statusInput: document.getElementById('taskStatusInput'),
+      fileInput: document.getElementById('taskFileInput'),
+      loadingState: document.getElementById('loadingState'),
+      errorState: document.getElementById('errorState'),
+      retryBtn: document.getElementById('retryBtn'),
+      themeToggle: document.getElementById('themeToggle'),
+      dashboardBtn: document.getElementById('dashboardBtn'),
+      toast: document.getElementById('toast'),
+      toastMsg: document.getElementById('toastMsg'),
+      toastIcon: document.getElementById('toastIcon'),
+      columns: {
+        pending: document.getElementById('pending-tasks'),
+        'in-progress': document.getElementById('inprogress-tasks'),
+        done: document.getElementById('done-tasks')
+      },
+      counts: {
+        pending: document.getElementById('pending-count'),
+        'in-progress': document.getElementById('inprogress-count'),
+        done: document.getElementById('done-count')
       }
-    })();
+    };
 
-    async function fetchProjectTitle() {
-      const res = await fetch("/projects", { headers: { Authorization: "Bearer " + token } });
-      const projects = await res.json();
-      const project = projects.find(p => p.id == projectId);
-      document.getElementById("projectTitle").textContent = "📝 " + (project?.title || "Project");
+    let editingTaskId = null;
+    let toastTimer;
+
+    // -------------- Theme --------------
+    function initTheme(){
+      const stored = localStorage.getItem('theme');
+      const prefers = matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = stored ? stored==='dark' : prefers;
+      document.documentElement.classList.toggle('dark', isDark);
+      ui.themeToggle.textContent = isDark ? '☀️' : '🌗';
+    }
+    ui.themeToggle.onclick = () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark?'dark':'light');
+      ui.themeToggle.textContent = isDark ? '☀️' : '🌗';
+    };
+
+    // -------------- Toast --------------
+    function showToast(msg,type='info'){
+      clearTimeout(toastTimer);
+      const colors = { info:['⚠️','bg-slate-800/90'], success:['✅','bg-green-600/90'], error:['⛔','bg-red-600/90'] };
+      const [icon, bg] = colors[type]||colors.info;
+      ui.toastIcon.textContent = icon;
+      ui.toastMsg.textContent = msg;
+      ui.toast.className = ui.toast.className.replace(/bg-[^ ]+/g,'');
+      ui.toast.classList.remove('translate-x-[140%]');
+      ui.toast.classList.add(bg,'translate-x-0');
+      toastTimer = setTimeout(()=> ui.toast.classList.add('translate-x-[140%]'), 3200);
     }
 
-    async function loadComments(taskId, container) {
-      const res = await fetch(`/tasks/${taskId}/comments`, {
-        headers: { Authorization: "Bearer " + token }
-      });
-      const comments = await res.json();
-      const wrapper = document.createElement("div");
-      wrapper.className = "mt-4 space-y-2";
+    // -------------- Modal Helpers --------------
+    function openModal(mode='add', task=null){
+      editingTaskId = mode==='edit' ? task.id : null;
+      ui.modalTitle.textContent = mode==='edit' ? 'Edit Task' : 'Add New Task';
+      ui.modalSubmit.textContent = mode==='edit' ? 'Save Changes' : 'Create Task';
+      ui.titleInput.value = task?.title || '';
+      ui.descInput.value = task?.description || '';
+      ui.dueInput.value = task?.due_date ? task.due_date.split('T')[0] : '';
+      ui.statusInput.value = task?.status || 'pending';
+      ui.fileUploadContainer.style.display = mode==='edit' ? 'none':'block';
+      ui.taskModal.classList.remove('hidden');
+      ui.taskModal.classList.add('flex');
+    }
+    function closeModal(){
+      ui.taskModal.classList.add('hidden');
+      ui.taskModal.classList.remove('flex');
+    }
+    ui.cancelModal.onclick = closeModal;
+    ui.addTaskBtn.onclick = ()=> openModal('add');
 
-      comments.forEach(c => {
-        const bubble = document.createElement("div");
-        bubble.className = "bg-gray-100 dark:bg-gray-600 rounded px-3 py-2 text-sm";
-        bubble.innerHTML = `<strong>${c.user_name}:</strong> ${c.content}`;
-        wrapper.appendChild(bubble);
-      });
+    // -------------- API Calls --------------
+    async function fetchProject(){
+      const res = await fetch('/projects', { headers:{ Authorization:'Bearer '+token }});
+      if(!res.ok) throw new Error('Projects fetch failed');
+      const projects = await res.json();
+      const project = projects.find(p=> p.id == projectId);
+      ui.projectTitle.textContent = '🚀 ' + (project?.title || 'Project');
+    }
 
-      const form = document.createElement("form");
-      form.className = "flex gap-2 mt-2";
-      form.onsubmit = async (e) => {
-        e.preventDefault();
-        const input = form.querySelector("input");
-        const text = input.value.trim();
-        if (!text) return;
-        await fetch(`/tasks/${taskId}/comments`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token
-          },
-          body: JSON.stringify({ content: text })
-        });
-        input.value = "";
-        await loadTasks();
+    async function listTasks(){
+      const res = await fetch(`/projects/${projectId}/tasks`, { headers:{ Authorization:'Bearer '+token }});
+      if(!res.ok) throw new Error('Tasks fetch failed');
+      return res.json();
+    }
+
+    async function createTask(){
+      const fd = new FormData();
+      fd.append('title', ui.titleInput.value.trim());
+      fd.append('description', ui.descInput.value.trim());
+      fd.append('status', ui.statusInput.value);
+      if(ui.dueInput.value) fd.append('due_date', ui.dueInput.value);
+      if(ui.fileInput.files[0]) fd.append('file', ui.fileInput.files[0]);
+      const res = await fetch(`/projects/${projectId}/tasks`, { method:'POST', headers:{ Authorization:'Bearer '+token }, body: fd });
+      if(!res.ok) throw new Error('Create failed');
+      return res.json();
+    }
+
+    async function updateTask(id, payload){
+      const res = await fetch(`/tasks/${id}`, { method:'PATCH', headers:{ 'Content-Type':'application/json', Authorization:'Bearer '+token }, body: JSON.stringify(payload) });
+      if(!res.ok) throw new Error('Update failed');
+      return res.json();
+    }
+
+    async function removeTask(id){
+      const res = await fetch(`/tasks/${id}`, { method:'DELETE', headers:{ Authorization:'Bearer '+token }});
+      if(!res.ok) throw new Error('Delete failed');
+    }
+
+    async function listComments(taskId){
+      const res = await fetch(`/tasks/${taskId}/comments`, { headers:{ Authorization:'Bearer '+token }});
+      if(!res.ok) return [];
+      return res.json();
+    }
+    async function addComment(taskId, content){
+      const res = await fetch(`/tasks/${taskId}/comments`, { method:'POST', headers:{ 'Content-Type':'application/json', Authorization:'Bearer '+token }, body: JSON.stringify({ content }) });
+      if(!res.ok) throw new Error('Comment failed');
+      return res.json();
+    }
+
+    // -------------- Rendering --------------
+    function clearBoard(){ Object.values(ui.columns).forEach(c=> c.innerHTML=''); }
+    function updateCounts(counts){ Object.entries(counts).forEach(([k,v])=> ui.counts[k].textContent = v); }
+    function showLoading(on){ ui.loadingState.classList.toggle('hidden', !on); document.getElementById('board').classList.toggle('opacity-30', on); }
+
+    function createTaskCard(task){
+      const card = document.createElement('div');
+      card.className = 'task-card p-4 rounded-lg bg-slate-800/80 border border-slate-700 cursor-grab active:cursor-grabbing animate-slideUp group';
+      card.draggable = true; card.dataset.taskId = task.id; card.dataset.status = task.status;
+      const dueDate = task.due_date ? task.due_date.split('T')[0] : null;
+      const overdue = dueDate && new Date(dueDate) < new Date();
+      const attachments = (task.attachments||[]).map(a=>{
+        const fn = a.filename || '';
+        const display = fn.includes('_') ? fn.substring(fn.indexOf('_')+1) : fn;
+        return `<a href="/uploads/${fn}" download class="text-xs text-cyan-400 hover:underline flex items-center gap-1">📎 ${display}</a>`;
+      }).join('');
+      card.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-semibold text-gray-100 pr-2 leading-snug break-words">${task.title}</h3>
+          <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+            <button class="edit-btn text-gray-400 hover:text-cyan-400" title="Edit">✏️</button>
+            <button class="del-btn text-gray-400 hover:text-red-400" title="Delete">🗑️</button>
+          </div>
+        </div>
+        <p class="text-xs text-gray-400 mb-3 whitespace-pre-line">${task.description || '—'}</p>
+        <div class="flex flex-wrap gap-3 text-[11px] items-center border-t border-slate-700/60 pt-2">
+          ${dueDate ? `<span class="px-2 py-0.5 rounded-full ${overdue?'bg-red-500/20 text-red-300':'bg-slate-700 text-slate-300'}">📅 ${dueDate}</span>`:''}
+          <button class="toggle-comments text-cyan-400 hover:underline">Comments (${task.comments?.length||0})</button>
+        </div>
+        <div class="attachments space-y-1 mt-2">${attachments}</div>
+        <div class="comments hidden mt-3 space-y-2"></div>
+      `;
+      // Edit/Delete handlers
+      card.querySelector('.edit-btn').onclick = ()=> openModal('edit', task);
+      card.querySelector('.del-btn').onclick = async ()=> { if(confirm('Delete this task?')) { try { await removeTask(task.id); showToast('Task deleted','success'); await reloadBoard(); } catch(e){ showToast(e.message,'error'); } } };
+      // Comments toggle
+      const commentsContainer = card.querySelector('.comments');
+      card.querySelector('.toggle-comments').onclick = async ()=>{
+        if(!commentsContainer.classList.contains('hidden')) { commentsContainer.classList.add('hidden'); return; }
+        commentsContainer.innerHTML = '<div class="text-xs text-slate-400">Loading…</div>';
+        commentsContainer.classList.remove('hidden');
+        const comments = await listComments(task.id);
+        renderComments(commentsContainer, task.id, comments);
       };
+      // Drag events
+      card.addEventListener('dragstart', dragStart);
+      return card;
+    }
 
-      const input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = "Write a comment...";
-      input.className = "flex-1 px-3 py-1 rounded border bg-white dark:bg-gray-600 text-gray-900 dark:text-white";
-
-      const btn = document.createElement("button");
-      btn.textContent = "Send";
-      btn.className = "bg-indigo-600 text-white px-3 rounded hover:bg-indigo-700";
-
-      form.appendChild(input);
-      form.appendChild(btn);
-
-      container.appendChild(wrapper);
+    function renderComments(container, taskId, comments){
+      container.innerHTML='';
+      if(!comments.length){ container.innerHTML = '<div class="text-xs text-slate-500">No comments yet.</div>'; }
+      comments.forEach(c=>{
+        const row = document.createElement('div');
+        row.className='bg-slate-700/70 px-2 py-1 rounded text-[11px] flex gap-1';
+        row.innerHTML = `<strong class="text-cyan-300">${c.user_name}:</strong><span class="flex-1 text-slate-200">${c.content}</span>`;
+        container.appendChild(row);
+      });
+      const form = document.createElement('form');
+      form.className='flex gap-2 mt-1';
+      form.innerHTML = `<input class="flex-1 bg-slate-800/80 border border-slate-600 rounded px-2 py-1 text-[11px] outline-none focus:ring-1 focus:ring-cyan-500" placeholder="Add comment" /><button class="px-2 bg-cyan-600 text-white rounded text-[11px]">Add</button>`;
+      form.onsubmit = async e=>{ e.preventDefault(); const val=form.querySelector('input').value.trim(); if(!val) return; try { await addComment(taskId,val); const updated=await listComments(taskId); renderComments(container, taskId, updated); } catch(err){ showToast(err.message,'error'); } };
       container.appendChild(form);
     }
 
-    async function loadTasks() {
-      const res = await fetch(`/projects/${projectId}/tasks`, {
-        headers: { Authorization: "Bearer " + token }
+    async function reloadBoard(){
+      try {
+        showLoading(true); ui.errorState.classList.add('hidden');
+        const tasks = await listTasks();
+        clearBoard(); const counts={ 'pending':0,'in-progress':0,'done':0 };
+        tasks.forEach(t=>{ counts[t.status]++; ui.columns[t.status].appendChild(createTaskCard(t)); });
+        updateCounts(counts);
+        updateEmptyPlaceholders();
+      } catch(err){ ui.errorState.classList.remove('hidden'); showToast(err.message,'error'); }
+      finally { showLoading(false); }
+    }
+
+    function updateEmptyPlaceholders(){
+      document.querySelectorAll('[data-status]').forEach(col=>{
+        const list = col.querySelector('.kanban-column');
+        const emptyEl = col.querySelector('.column-empty');
+        if(!list || !emptyEl){
+          console.warn('Kanban column missing expected child elements', {col, listExists: !!list, emptyExists: !!emptyEl});
+          return; // safeguard to avoid null.classList errors
+        }
+        emptyEl.classList.toggle('hidden', list.children.length>0);
       });
-      const tasks = await res.json();
-      const list = document.getElementById("taskList");
-      list.innerHTML = "";
-
-      const today = new Date().toISOString().split("T")[0];
-
-      for (const task of tasks) {
-        const dueDate = task.due_date ? task.due_date.split("T")[0] : null;
-        const isOverdue = dueDate && dueDate < today;
-        const isToday = dueDate && dueDate === today;
-
-        const statusColor = {
-          "pending": "bg-yellow-500",
-          "in-progress": "bg-blue-500",
-          "done": "bg-green-500"
-        }[task.status] || "bg-gray-500";
-
-        const dueText = dueDate
-          ? `<p class="text-sm mt-1 ${isOverdue ? 'text-red-500' : isToday ? 'text-orange-500' : 'text-gray-500 dark:text-gray-400'}">
-              🕒 Due: ${dueDate} ${isOverdue ? '(Overdue)' : isToday ? '(Today)' : ''}
-            </p>` : "";
-
-        const fileText = task.attachments?.length
-          ? task.attachments.map(att => `
-              <a href="/uploads/${att.filename}" class="text-sm text-blue-600 hover:underline block mt-2" download>
-                📎 ${att.filename}
-              </a>`).join("")
-          : "";
-
-        const div = document.createElement("div");
-        div.className = `p-4 rounded-lg shadow bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 ${isOverdue ? 'border-red-500' : ''}`;
-
-        div.innerHTML = `
-          <h3 class="text-lg font-bold text-gray-900 dark:text-white">${task.title}</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-300">${task.description || "No description"}</p>
-          ${dueText}
-          ${fileText}
-          <span class="inline-block mt-2 px-2 py-1 text-xs text-white rounded-full ${statusColor}">${task.status}</span>
-        `;
-
-        const actions = document.createElement("div");
-        actions.className = "mt-4 flex gap-2";
-
-        const editBtn = document.createElement("button");
-        editBtn.className = "text-blue-600 hover:underline";
-        editBtn.textContent = "Edit";
-        editBtn.onclick = () => showEditModal(task.id, task.title, task.description, task.status, task.due_date);
-
-        const delBtn = document.createElement("button");
-        delBtn.className = "text-red-600 hover:underline";
-        delBtn.textContent = "Delete";
-        delBtn.onclick = () => deleteTask(task.id);
-
-        actions.appendChild(editBtn);
-        actions.appendChild(delBtn);
-        div.appendChild(actions);
-
-        const commentSection = document.createElement("div");
-        commentSection.className = "mt-4 border-t pt-4 border-gray-200 dark:border-gray-600";
-        await loadComments(task.id, commentSection);
-        div.appendChild(commentSection);
-
-        list.appendChild(div);
-      }
     }
 
-    async function createTask() {
-      const title = document.getElementById("taskTitle").value;
-      const description = document.getElementById("taskDesc").value;
-      const status = document.getElementById("taskStatus").value;
-      const due_date = document.getElementById("taskDue").value || null;
-      const file = document.getElementById("taskFile").files[0];
-
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("description", description);
-      formData.append("status", status);
-      if (due_date) formData.append("due_date", due_date);
-      if (file) formData.append("file", file);
-
-      const res = await fetch(`/projects/${projectId}/tasks`, {
-        method: "POST",
-        headers: { Authorization: "Bearer " + token },
-        body: formData
+    // -------------- Drag & Drop --------------
+    let dragged=null; let originStatus=null; let originIndex=null;
+    function dragStart(e){ dragged=e.currentTarget; originStatus=dragged.dataset.status; originIndex=[...dragged.parentElement.children].indexOf(dragged); e.dataTransfer.effectAllowed='move'; setTimeout(()=> dragged.classList.add('dragging'),0); }
+    document.querySelectorAll('.kanban-column').forEach(col=>{
+      col.addEventListener('dragover', e=>{ e.preventDefault(); col.classList.add('drag-over'); });
+      col.addEventListener('dragleave', ()=> col.classList.remove('drag-over'));
+      col.addEventListener('drop', async e=>{
+        e.preventDefault(); col.classList.remove('drag-over'); if(!dragged) return; const newStatus = col.parentElement.getAttribute('data-status');
+        if(newStatus===dragged.dataset.status){ dragged.classList.remove('dragging'); dragged=null; return; }
+        col.appendChild(dragged); const taskId=dragged.dataset.taskId; dragged.dataset.status=newStatus; // optimistic
+        try { await updateTask(taskId,{ status:newStatus }); showToast('Status updated','success'); await reloadBoard(); }
+        catch(err){ showToast('Update failed, reverting','error'); // rollback
+          const originCol = document.querySelector(`[data-status="${originStatus}"] .kanban-column`);
+          if(originCol){ const children=[...originCol.children]; if(originIndex>=children.length) originCol.appendChild(dragged); else originCol.insertBefore(dragged, children[originIndex]); dragged.dataset.status=originStatus; }
+        }
+        finally { dragged.classList.remove('dragging'); dragged=null; }
       });
+    });
 
-      if (res.ok) {
-        document.getElementById("taskTitle").value = "";
-        document.getElementById("taskDesc").value = "";
-        document.getElementById("taskDue").value = "";
-        document.getElementById("taskStatus").value = "pending";
-        document.getElementById("taskFile").value = "";
-        await loadTasks();
-      } else {
-        alert("Failed to create task");
-      }
-    }
+    // -------------- Modal Submit --------------
+    ui.modalSubmit.onclick = async ()=>{
+      try {
+        if(!ui.titleInput.value.trim()) { showToast('Title required','error'); return; }
+        if(editingTaskId){ await updateTask(editingTaskId,{ title: ui.titleInput.value.trim(), description: ui.descInput.value.trim(), status: ui.statusInput.value, due_date: ui.dueInput.value || null }); showToast('Task updated','success'); }
+        else { await createTask(); showToast('Task created','success'); }
+        closeModal(); await reloadBoard();
+      } catch(err){ showToast(err.message,'error'); }
+    };
 
-    function showEditModal(id, title, description, status, due_date) {
-      editingTaskId = id;
-      document.getElementById("editTitle").value = title || "";
-      document.getElementById("editDesc").value = description || "";
-      document.getElementById("editStatus").value = status || "pending";
-      document.getElementById("editDue").value = due_date ? due_date.split("T")[0] : "";
-      document.getElementById("editModal").classList.remove("hidden");
-      document.getElementById("editModal").classList.add("flex");
-    }
+    // -------------- Navigation Links --------------
+    ui.analyticsLink.href = `/analytics?id=${projectId}`;
+    ui.membersLink.href = `/members?project_id=${projectId}`;
+    ui.dashboardBtn.onclick = ()=> location.href='/dashboard';
+    ui.retryBtn && (ui.retryBtn.onclick = reloadBoard);
 
-    function closeModal() {
-      document.getElementById("editModal").classList.add("hidden");
-      document.getElementById("editModal").classList.remove("flex");
-    }
-
-    async function submitEdit() {
-      const title = document.getElementById("editTitle").value;
-      const description = document.getElementById("editDesc").value;
-      const status = document.getElementById("editStatus").value;
-      const due_date = document.getElementById("editDue").value || null;
-
-      const res = await fetch(`/tasks/${editingTaskId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
-        },
-        body: JSON.stringify({ title, description, status, due_date })
-      });
-
-      if (res.ok) {
-        closeModal();
-        await loadTasks();
-      } else {
-        alert("Failed to update task");
-      }
-    }
-
-    async function deleteTask(taskId) {
-      if (!confirm("Are you sure you want to delete this task?")) return;
-      const res = await fetch(`/tasks/${taskId}`, {
-        method: "DELETE",
-        headers: { Authorization: "Bearer " + token }
-      });
-
-      if (res.ok) await loadTasks();
-      else alert("Failed to delete task");
-    }
-
-    fetchProjectTitle();
-    loadTasks();
+    // -------------- Init --------------
+    (async function init(){
+      initTheme();
+      try { await fetchProject(); } catch(e){ showToast('Project load failed','error'); }
+      await reloadBoard();
+    })();
   </script>
 </body>
 </html>
